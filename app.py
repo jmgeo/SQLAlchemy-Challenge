@@ -116,5 +116,5 @@ def End_Date(start=None, end=None):
     date_range_list = list(date_range)
     return jsonify(date_range_list)
 
-#if __name__ == "__main__":
-    #app.run(debug=False)
+if __name__ == "__main__":
+    app.run(debug=False)
