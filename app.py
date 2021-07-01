@@ -5,7 +5,7 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 
-import datetime as dt
+from datetime import datetime as dt
 
 from flask import Flask, jsonify
 
@@ -46,8 +46,8 @@ def Home():
         f"Precipitation: /api/v1.0/precipitation<br/>"
         f"Stations: /api/v1.0/stations<br/>"
         f"Temperatures: /api/v1.0/tobs<br/>"
-        f"Start Date: /api/v1.0/<start><br/>"
-        f"End Date: /api/v1.0/<start>/<end><br/>"
+        f"Start_Date: /api/v1.0/<start><br/>"
+        f"End_Date: /api/v1.0/<start>/<end><br/>"
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -90,7 +90,7 @@ def Stations():
 @app.route("/api/v1.0/tobs")
 def Temperatures():
     data = session.data(station.name, measurement.date, measurement.tobs).\
-        filter(measurement.date >= "2017-01-01", measurement.date <= "2018-01-01")
+        filter(measurement.date >= "2016-08-22", measurement.date <= "2017-08-23")
         all()
 
     #dictionary for JSON
@@ -103,3 +103,18 @@ def Temperatures():
         tobs_list.append(row)
         
     return jsonify(tobs_list)
+
+@app.route("/api/v1.0/<start>")
+def Start_Date(start=None):
+    start_begin = session.data(measurement.date, func.min(measurement.tobs), func.avg(measurement.tobs), func.max(measurement.tobs)).filter(measurement.date >= Start_Date).group_by(measurement.date).all()
+    start_begin_list = list(start_begin)
+    return jsonify(start_begin_list)
+
+@app.route("/api/v1.0/<start>/<end>")
+def End_Date(start=None, end=None)
+    date_range = session.data(measurement.date, func.min(measurement.tobs), func.avg(measurement.tobs), func.max(measurement.tobs)).filter(measurement.date >= Start_Date).filter(measurement.date <= End_Date).group_by(measurement.date).all()
+    date_range_list = list(date_range)
+    return jsonify(date_range_list)
+
+#if __name__ == "__main__":
+    #app.run(debug=False)
