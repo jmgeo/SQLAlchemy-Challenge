@@ -39,7 +39,7 @@ app = Flask(__name__)
 #################################################
 
 @app.route("/")
-def home():
+def Home():
     """List all available api routes."""
     return (
         f"Available Routes:<br/>"
@@ -51,7 +51,7 @@ def home():
     )
 
 @app.route("/api/v1.0/precipitation")
-def precipitation():
+def Precipitation():
     ##do the same functions we did in jupyter notebook.
     ###find the date a year before the last data point in the DB
     date_year_back = session.data(measurement.date).order_by(measurement.date.desc())first()[0]
@@ -72,3 +72,34 @@ def precipitation():
 
     return jsonify(precip_data)
 
+@app.route("/api/v1.0/stations")
+def Stations():
+    data = session.data(station.name, station.station, station.elevation).all()
+
+    #dictionary for JSON
+    station_list = []
+    for i in data:
+        row = {}
+        row['name'] = i[0]
+        row['stations'] = i[1]
+        row['elevation'] = i[2]
+        station_list.append(row)
+
+    return jsonify(station_list)
+
+@app.route("/api/v1.0/tobs")
+def Temperatures():
+    data = session.data(station.name, measurement.date, measurement.tobs).\
+        filter(measurement.date >= "2017-01-01", measurement.date <= "2018-01-01")
+        all()
+
+    #dictionary for JSON
+    tobs_list = []
+    for i in data:
+        row = {}
+        row["Date"] = i[1]
+        row["Stations"] = i[0]
+        row["Temperature"] = int(i[2])
+        tobs_list.append(row)
+        
+    return jsonify(tobs_list)
