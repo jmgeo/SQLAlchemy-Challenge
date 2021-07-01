@@ -22,8 +22,8 @@ Base = automap_base()
 Base.prepare(engine, reflect=True)
 
 # Save reference to the table
-measurement = base.classes.measurement
-station = base.classes.station
+measurement = Base.classes.measurement
+station = Base.classes.station
 
 #Session Link
 session = Session(engine)
@@ -39,8 +39,36 @@ app = Flask(__name__)
 #################################################
 
 @app.route("/")
-def welcome():
+def home():
     """List all available api routes."""
     return (
         f"Available Routes:<br/>"
+        f"Precipitation: /api/v1.0/precipitation<br/>"
+        f"Stations: /api/v1.0/stations<br/>"
+        f"Temperatures: /api/v1.0/tobs<br/>"
+        f"Start Date: /api/v1.0/<start><br/>"
+        f"End Date: /api/v1.0/<start>/<end><br/>"
     )
+
+@app.route("/api/v1.0/precipitation")
+def precipitation():
+    ##do the same functions we did in jupyter notebook.
+    ###find the date a year before the last data point in the DB
+    date_year_back = session.data(measurement.date).order_by(measurement.date.desc())first()[0]
+    previous_year = dt.datetime.strptime(last_date, "%Y-%m-%d") - dt.timedelta(days=366)
+    ####query for date and precipitation prcp
+    data = session.data(measurement.date, measurement.prcp).\
+        filter(measurement.date >= previous_year).all()
+
+    #####convert the query to a dictionary with date as the key and prcp as the value
+    ######Return a JSON of the dictionary
+
+    precip_data = []
+    for i, prcp in data:
+        data = {}
+        data['date'] = i
+        data['prcp'] = prcp
+        precip_data.append(data)
+
+    return jsonify(precip_data)
+
