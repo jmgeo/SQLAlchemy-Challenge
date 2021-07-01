@@ -54,7 +54,7 @@ def Home():
 def Precipitation():
     ##do the same functions we did in jupyter notebook.
     ###find the date a year before the last data point in the DB
-    date_year_back = session.data(measurement.date).order_by(measurement.date.desc())first()[0]
+    date_year_back = session.data(measurement.date).order_by(measurement.date.desc()).first()[0]
     previous_year = dt.datetime.strptime(last_date, "%Y-%m-%d") - dt.timedelta(days=366)
     ####query for date and precipitation prcp
     data = session.data(measurement.date, measurement.prcp).\
@@ -90,7 +90,7 @@ def Stations():
 @app.route("/api/v1.0/tobs")
 def Temperatures():
     data = session.data(station.name, measurement.date, measurement.tobs).\
-        filter(measurement.date >= "2016-08-22", measurement.date <= "2017-08-23")
+        filter(measurement.date >= "2016-08-22", measurement.date <= "2017-08-23").\
         all()
 
     #dictionary for JSON
@@ -111,7 +111,7 @@ def Start_Date(start=None):
     return jsonify(start_begin_list)
 
 @app.route("/api/v1.0/<start>/<end>")
-def End_Date(start=None, end=None)
+def End_Date(start=None, end=None):
     date_range = session.data(measurement.date, func.min(measurement.tobs), func.avg(measurement.tobs), func.max(measurement.tobs)).filter(measurement.date >= Start_Date).filter(measurement.date <= End_Date).group_by(measurement.date).all()
     date_range_list = list(date_range)
     return jsonify(date_range_list)
